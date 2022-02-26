@@ -1,20 +1,31 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.util.ArrayList;
 import javax.swing.*;
 
 public class AccountManagement extends JFrame {
-    final private Font mainFont = new Font("Helvetica", Font.BOLD, 18);
+    final private Font Heading = new Font("Helvetica", Font.BOLD, 18);
+    final private Font mainFont = new Font("Helvetica", Font.BOLD, 12);
+
     JLabel lbWelcome, lbstudentID, lbfullName, lbcourse, lbyearLvl, lbaddress, lbemail, lbcontact; //textarea
     JTextField tfstudentID, tffullName, tfaddress, tfemail, tfcontact; //textbox
     JComboBox<String> ddcourse; //dropdown
     JComboBox<Integer> ddyearLvl;
     JButton btnClear, btnUpdate, btnExit, btnNext, btnPrevious; //buttons
-    //ArrayList<Student> studentList;
+
+    ArrayList<Student> studentList;
     int currIndex;
 
-    public void initialize() {
+    public void initialize(ArrayList<Student> studentList)
+    {
+        if(studentList.size()==0 || studentList==null) {
+            JOptionPane.showMessageDialog(null, "No data to load");
+            System.exit(0);
+        }
+        this.studentList=studentList;
+        currIndex=0;
+
         /* Labels */   
         lbWelcome=new JLabel("Account Information");
         lbstudentID=new JLabel("Student ID:");
@@ -26,7 +37,7 @@ public class AccountManagement extends JFrame {
         lbcontact=new JLabel("Contact Number:");
 
         /* Label Fonts and Size */
-        lbWelcome.setFont(mainFont);
+        lbWelcome.setFont(Heading);
         lbstudentID.setFont(mainFont);
         lbfullName.setFont(mainFont);
         lbcourse.setFont(mainFont);
@@ -129,9 +140,150 @@ public class AccountManagement extends JFrame {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
     }
+    
+    private void getData(Student s)
+    {
+       tfstudentID.setText(s.getstudentID());
+       tffullName.setText(s.getfullName());
+       tfaddress.setText(s.getaddress());
+       tfemail.setText(s.getemail());
+       tfcontact.setText(s.getcontact());
+
+       int yearLvl = s.getyearLvl;
+       switch (yearLvl)
+       {
+        case 1:
+            ddyearLvl.setSelectedIndex(0);
+            break;
+        case 2:
+            ddyearLvl.setSelectedIndex(1);
+            break;
+        case 3:
+            ddyearLvl.setSelectedIndex(2);
+            break;
+        case 4:
+            ddyearLvl.setSelectedIndex(3);
+            break;
+        case 5:
+            ddyearLvl.setSelectedIndex(4);
+            break;
+        case 6:
+            ddyearLvl.setSelectedIndex(5);
+            break;
+        default:
+            JOptionPane.showMessageDialog(null, "Invalid year level");
+            System.exit(0);
+       }
+
+       String course = s.getCourse();
+       switch (course)
+       {
+        case "BSCS-CE":
+            ddcourse.setSelectedIndex(0);
+            break;
+        case "BSCS-CPP":
+            ddcourse.setSelectedIndex(1);
+            break;
+        case "BSCS-DS":
+            ddcourse.setSelectedIndex(2);
+            break;
+        case "BSCS-NET":
+            ddcourse.setSelectedIndex(3);
+            break;
+        default:
+            JOptionPane.showMessageDialog(null, "Invalid course");
+            System.exit(0);
+       }
+    }
+    
+    private boolean check()
+    {
+        if(tfstudentID.getText().equals("")) {
+            JOptionPane.showMessageDialog(null, "Invalid student id!");
+            return false;
+        }
+        if(tffullName.getText().equals("")) {
+                JOptionPane.showMessageDialog(null, "Invalid student name!");
+                return false;
+        }
+        if(tfaddress.getText().equals("")) {
+                JOptionPane.showMessageDialog(null, "Invalid address!");
+                return false;
+        }
+        if(tfemail.getText().equals("")) {
+                JOptionPane.showMessageDialog(null, "Invalid email!");
+                return false;
+        }
+        if(tfcontact.getText().equals("")) {
+                JOptionPane.showMessageDialog(null, "Invalid contact!");
+                return false;
+        }
+        return true;
+    }
+    @Override
+
+    public void actionPerformed(ActionEvent event) 
+    {
+        if(event.getSource()==btnExit) {
+                exitApplication();
+        }
+        if(event.getSource()==btnNext) {
+                next();
+        }
+        if(event.getSource()==btnPrevious) {
+                previous();
+        }
+        if(event.getSource()==btnUpdate) {
+                update();
+        }
+    }
+
+    private void update() {
+        if(check()==false){return;}
+        Student s=studentList.get(currIndex);
+        s.setStudentId(tfstudentID.getText());
+        s.setName(tffullName.getText());
+        s.setAddress(tfaddress.getText());
+        s.setContact(tfcontact.getText());
+        s.setEmail(tfemail.getText());
+        JOptionPane.showMessageDialog(null, "Record updated!");
+    }    
+
+    private void next() 
+    {
+        if(currIndex==studentList.size()-1) {
+                JOptionPane.showMessageDialog(null, "End of record!");
+                return;
+        }
+
+        currIndex++;
+        Student s=studentList.get(currIndex);
+        getData(s);
+    }
+
+    private void previous() 
+    {
+        if(currIndex==0) {
+                JOptionPane.showMessageDialog(null, "End of record!");
+                return;
+        }
+        currIndex--;
+        Student s=studentList.get(currIndex);
+        getData(s);
+    }
+
+    private void exitApplication()
+    {
+        int result = JOptionPane.showConfirmDialog(null,"Sure? You want to exit?", "Exit application",
+               JOptionPane.YES_NO_OPTION,
+               JOptionPane.QUESTION_MESSAGE);
+        if(result == JOptionPane.YES_OPTION){System.exit(0);}
+    }
 
     public static void main(String[] args){
-        AccountManagement myFrame = new AccountManagement();
-        myFrame.initialize();
+        ArrayList<Student> studentList;
+        studentList=new ArrayList<Student>();
+        studentList.add(new Student("1","Alex","BSCS-CPP",6,"Manhatan","alex@mail.com","4582135968"));
+        AccountManagement account=new AccountManagement(studentList);
     }
 }
